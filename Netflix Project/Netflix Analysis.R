@@ -13,6 +13,11 @@ movie$Adjusted_Gross = as.numeric(gsub(",","",as.character(movie$Adjusted_Gross)
 movie$Profit_num = as.numeric(gsub(",","",as.character(movie$Profit)))
 movie$Overseas_rev = as.numeric(gsub(",","",as.character(movie$Overseas_rev)))
 
+#by time
+movie$Release_Date <- as.POSIXct(movie$Release_Date, format = "%d/%m/%Y")
+movie_2000 = movie[movie$Release_Date >= "2000-1-1",]
+ggplot(movie_2000,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point()
+
 #correlation map
 corrgram(movie, order=NULL, panel=panel.shade, text.panel=panel.txt,
          main="Correlogram")
@@ -79,6 +84,7 @@ ggplot(movie, aes(x = Profit_num, color = Day_of_Week)) + geom_freqpoly()
 ggplot(movie, aes(x = Adjusted_Gross, color = Day_of_Week)) + geom_freqpoly() + xlim(0,1000)
 ggplot(movie, aes(x = Day_of_Week, y = Profit_num)) + geom_boxplot() + ylim(0,400)
 ggplot(movie, aes(x = Day_of_Week, y = Adjusted_Gross)) + geom_boxplot() + ylim(0,1000)
+
 
 #you have explored many variables and how they affect revenue
 #please recommend a strategy for Netflix's next investment in a movie. 

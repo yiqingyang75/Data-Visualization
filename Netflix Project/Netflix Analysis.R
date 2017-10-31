@@ -88,6 +88,13 @@ ggplot(movie, aes(x = Adjusted_Gross, color = Day_of_Week)) + geom_freqpoly() + 
 ggplot(movie, aes(x = Day_of_Week, y = Profit_num)) + geom_boxplot() + ylim(0,400)
 ggplot(movie, aes(x = Day_of_Week, y = Adjusted_Gross)) + geom_boxplot() + ylim(0,1000)
 
+#Creates a variable where we cap the maximum.
+#Although now I think some more about this, it's possible this doesn't help -- works well if you're 
+#trying to calculate the average effect, but it may create other problems.  We can discuss.
+movie_2000$CapAdjGross <- replace(movie_2000$Adjusted_Gross, movie_2000$Adjusted_Gross>1500, 1500)
+ggplot(movie_2000, aes(x = CapAdjGross)) + geom_histogram(binwidth = 100)
+filter(movie_2000, Adjusted_Gross > 1500)
+
 
 #you have explored many variables and how they affect revenue
 #please recommend a strategy for Netflix's next investment in a movie. 

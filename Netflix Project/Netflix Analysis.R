@@ -6,6 +6,7 @@ library(stringr)
 library(corrgram)
 
 setwd("C:/Users/yiqin/Dropbox/UCD/17Fall/431 Data Visualization/Week2")
+#setwd("C:/Users/Caroline/Dropbox/MSBA/BAX 431")
 
 movie = read.csv("movie.csv")
 #convert factor into numeric
@@ -40,7 +41,9 @@ cor(movie$Runtime_min,movie[,c("Profit_num","Adjusted_Gross","MovieLens_Rating",
 
 #If a movie does well in US, does it also usually do well overseas? 
 ggplot(movie, aes(x = US_rev, y = Overseas_rev)) +   
-  geom_point() + geom_smooth(se = TRUE) 
+  geom_point() + geom_smooth(se = TRUE) + geom_abline(slope = -1, intercept = 200)
+#CT comment -- I added the ab line to demonstrate the $200m mininum on these plots. 
+
 cor(movie$US_rev,movie$Overseas_rev)
 
 

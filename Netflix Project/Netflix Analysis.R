@@ -6,6 +6,7 @@ library(stringr)
 library(corrgram)
 
 setwd("C:/Users/yiqin/Dropbox/UCD/17Fall/431 Data Visualization/Week2")
+#setwd("C:/Users/Caroline/Dropbox/MSBA/BAX 431")
 
 movie = read.csv("movie.csv")
 #convert variables into correct type
@@ -114,7 +115,9 @@ ggplot(movie, aes(x = IMDb_Rating, y = Adjusted_Gross)) +
 
 #If a movie does well in US, does it also usually do well overseas? 
 ggplot(movie, aes(x = US_rev, y = Overseas_rev)) +   
-  geom_point() + geom_smooth(se = TRUE) 
+  geom_point() + geom_smooth(se = TRUE) + geom_abline(slope = -1, intercept = 200)
+#CT comment -- I added the ab line to demonstrate the $200m mininum on these plots. 
+
 cor(movie$US_rev,movie$Overseas_rev)
 
 
@@ -142,6 +145,13 @@ ggplot(movie, aes(x = Profit_num, color = Day_of_Week)) + geom_freqpoly()
 ggplot(movie, aes(x = Adjusted_Gross, color = Day_of_Week)) + geom_freqpoly() + xlim(0,1000)
 ggplot(movie, aes(x = Day_of_Week, y = Profit_num)) + geom_boxplot() + ylim(0,400)
 ggplot(movie, aes(x = Day_of_Week, y = Adjusted_Gross)) + geom_boxplot() + ylim(0,1000)
+
+#Creates a variable where we cap the maximum.
+#Although now I think some more about this, it's possible this doesn't help -- works well if you're 
+#trying to calculate the average effect, but it may create other problems.  We can discuss.
+movie_2000$CapAdjGross <- replace(movie_2000$Adjusted_Gross, movie_2000$Adjusted_Gross>1500, 1500)
+ggplot(movie_2000, aes(x = CapAdjGross)) + geom_histogram(binwidth = 100)
+filter(movie_2000, Adjusted_Gross > 1500)
 
 
 #you have explored many variables and how they affect revenue

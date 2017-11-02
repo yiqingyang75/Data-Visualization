@@ -18,7 +18,9 @@ movie$Profit = as.numeric(gsub(",","",as.character(movie$Profit)))
 movie$Overseas_rev = as.numeric(gsub(",","",as.character(movie$Overseas_rev)))
 movie$Release_Date <- as.POSIXct(movie$Release_Date, format = "%d/%m/%Y")
 movie$Release_Month = month(movie$Release_Date)
+movie$Release_Year = year(movie$Release_Date)
 summary(movie)
+summary(movie[,c("Adjusted_Gross","Gross_rev","Profit")])
 str(movie)
 
 #check the distribution, very long right tail -> outliers
@@ -46,10 +48,22 @@ movie = modify_outlier(movie,"Profit_perc")
 ggplot(movie,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
   ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
 
+ggplot(movieC,aes(Release_Year, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + 
+  geom_vline(aes(xintercept=2000), colour='red', linetype='dashed', lwd=1) + 
+  xlab("Year") + ggtitle("Preference of genre over year")
+
+
 movie_2000 = movie[movie$Release_Date >= "2000-1-1",]
+
 ggplot(movie_2000,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
   ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
 
+ggplot(movie_2000,aes(Release_Year, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + 
+  geom_vline(aes(xintercept=2000), colour='red', linetype='dashed', lwd=1) + 
+  xlab("Year") + ggtitle("Preference of genre over year")
+summary(movie_2000)
 
 #Release time vs revenue
 ggplot(movie_2000,aes(Day_of_Week, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
@@ -81,7 +95,12 @@ ggplot(movie, aes(x = IMDb_Rating, y = Adjusted_Gross)) +
 cor(movie_2000$Profit_perc,movie_2000[,c("MovieLens_Rating","IMDb_Rating")])
 
 
-##If a movie does well in US, does it also usually do well overseas? 
+#relationship between budget and revenue
+ggplot(data = movie_2000, aes(x = Budget, y = Adjusted_Gross)) + geom_point() + 
+  geom_smooth(se=TRUE) + ylab("Revenue") +  ggtitle("Budget vs Revenue") + theme_economist()
+
+
+#If a movie does well in US, does it also usually do well overseas? 
 ggplot(movie_2000, aes(x = US_rev, y = Overseas_rev)) +   
   geom_point() + geom_smooth(se = TRUE) + 
   xlab("US Revenue") + ylab("Overseas Revenue") + ggtitle("US Revenue vs Overseas Revenue") + 

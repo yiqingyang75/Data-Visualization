@@ -5,17 +5,19 @@ library(forcats)
 library(stringr)
 library(corrgram)
 library(ggthemes)
+library(lubridate)
 
 setwd("C:/Users/yiqin/Dropbox/UCD/17Fall/431 Data Visualization/Week2")
 
 movie = read.csv("movie.csv")
 
-#convert variables into correct type
+#convert variables
 movie$Adjusted_Gross = as.numeric(gsub(",","",as.character(movie$Adjusted_Gross)))
 movie$Gross_rev = as.numeric(gsub(",","",as.character(movie$Gross_rev)))
 movie$Profit = as.numeric(gsub(",","",as.character(movie$Profit)))
 movie$Overseas_rev = as.numeric(gsub(",","",as.character(movie$Overseas_rev)))
 movie$Release_Date <- as.POSIXct(movie$Release_Date, format = "%d/%m/%Y")
+movie$Release_Month = month(movie$Release_Date)
 summary(movie)
 str(movie)
 
@@ -49,15 +51,24 @@ ggplot(movie_2000,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
   ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
 
 
-C#relationship between revenue and ranking -> maybe some, cor > 0.3
+#Release time vs revenue
+ggplot(movie_2000,aes(Day_of_Week, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + xlab("Weekday") + ggtitle("Which day to release")
+ggplot(movie_2000,aes(Release_Month, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + xlab("Weekday") + ggtitle("Which month to release")
+
+
+#relationship between revenue and ranking -> maybe some, cor > 0.3
 ggplot(movie_2000, aes(x = MovieLens_Rating, y = Adjusted_Gross)) +   
   geom_point() + geom_smooth(se = TRUE) + 
-  ylab ("Ajusted Gross Revenue") + ggtitle("MovieLens Rating vs Revenue") + theme_economist()
+  ylab ("Ajusted Gross Revenue") + ggtitle("MovieLens Rating vs Revenue")  + theme_economist()
 
 ggplot(movie, aes(x = IMDb_Rating, y = Adjusted_Gross)) +   
   geom_point() + geom_smooth( se = TRUE) + 
   ylab ("Ajusted Gross Revenue") + ggtitle("IMDb Rating vs Revenue") + theme_economist()
-Ccor(movie_2000$Adjusted_Gross,movie_2000[,c("MovieLens_Rating","IMDb_Rating")])
+
+cor(movie_2000$Adjusted_Gross,movie_2000[,c("MovieLens_Rating","IMDb_Rating")])
+
 
 #relationship between ROI and ranking -> not much. cor < 0.2
 ggplot(movie_2000, aes(x = MovieLens_Rating, y = Profit_perc)) +   
@@ -69,10 +80,11 @@ ggplot(movie, aes(x = IMDb_Rating, y = Adjusted_Gross)) +
   ylab("ROI") + ggtitle ("IMDb Rating VS ROI") + theme_economist()
 cor(movie_2000$Profit_perc,movie_2000[,c("MovieLens_Rating","IMDb_Rating")])
 
+
 ##If a movie does well in US, does it also usually do well overseas? 
 ggplot(movie_2000, aes(x = US_rev, y = Overseas_rev)) +   
   geom_point() + geom_smooth(se = TRUE) + 
-  xlab("US Revenue") + ylab("Overseas Revenue") + ggtitle("US Revenue vs Overseas Revenue") +
+  xlab("US Revenue") + ylab("Overseas Revenue") + ggtitle("US Revenue vs Overseas Revenue") + 
   theme_economist()
 cor(movie$US_rev,movie$Overseas_rev)
 
@@ -168,5 +180,10 @@ ggplot(movie2000_target, aes(x = Runtime_min, y = Profit_perc)) +
 
 
 ####Release Month?####
+ggplot(movie2000_target,aes(Release_Month, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + xlab("Month") + ggtitle("Which month to release (Revenue)")
+
+ggplot(movie2000_target,aes(Release_Month, Genre,fill = Profit_perc)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + xlab("Month") + ggtitle("Which month to release (ROI)")
 
 

@@ -14,12 +14,14 @@ movie_2000 = movie[movie$Release_Date >= "2000-1-1",]
 movie_1985 = movie[movie$Release_Date >= "1985-1-1",]
 
 #general analysis post 2000
-stat_mean <- aggregate(Adjusted_Gross~Genre, movie_200, mean)
+stat_mean <- aggregate(Adjusted_Gross~Genre, movie_2000, mean)
 stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
-ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
-  aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
+ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + 
+  geom_text(aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Genre")+ylab("Adjusted_Gross")+ggtitle("Adjusted_Gross by Genre post 2000")
+  vjust = -0.5, size = 2)+ 
+  xlab("Genre")+ylab("Adjusted_Gross")+ggtitle("Adjusted_Gross by Genre post 2000")
+
 #Studio, 2000
 stat_mean <- aggregate(Adjusted_Gross~Studio, movie_2000, mean)
 stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
@@ -27,6 +29,7 @@ ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gros
   aes(x = Studio, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
   vjust = -0.5, size = 2)+ xlab("Studio")+ylab("Adjusted_Gross")+ggtitle("Adjusted_Gross by Studio")
+
 #ROI studio 
 stat_mean <- aggregate(Profit_perc~Studio, movie_2000, mean)
 stat_mean$Profit_perc <- round(stat_mean$Profit_perc, 2)
@@ -81,10 +84,12 @@ ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross
 movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
 stat_mean <- aggregate(Adjusted_Gross~Director, movie_successful_revenue, mean)
 stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
-ggplot(data = stat_mean, aes(x=reorder(Director,Adjusted_Gross), y = Adjusted_Gross, fill = Director)) + geom_bar(stat = "identity") + geom_text(
+ggplot(data = stat_mean, aes(x=reorder(Director,Adjusted_Gross), y = Adjusted_Gross, fill = Director)) + 
+  geom_bar(stat = "identity") + geom_text(
   aes(x = Director, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (money) by Director post 2000")
+  vjust = -0.5, size = 2) + coord_flip() +
+  xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000) by Director")
 
 #successful Studio money &reputation post-2000
 movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
@@ -93,7 +98,8 @@ stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
 ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gross, fill = Studio)) + geom_bar(stat = "identity") + geom_text(
   aes(x = Studio, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (money) by Studio post 2000")
+  vjust = -0.5, size = 2) + coord_flip() + 
+  xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue > 1000) by Studio")
 
 #Success is Money + Reputation
 #rev>1000 &rating >=8
@@ -104,7 +110,9 @@ stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
 ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
   aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Genre")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (money&reputation) by Genre post 2000")
+  vjust = -0.5, size = 2)+ 
+  xlab("Genre")+ylab("Adjusted Gross Revenue")+
+  ggtitle("Successful (revenue>1000 & rate > 8) by Genre")
 
 #successful director!! money&reputation post-2000
 movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
@@ -114,7 +122,8 @@ stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
 ggplot(data = stat_mean, aes(x=reorder(Director,Adjusted_Gross), y = Adjusted_Gross, fill = Director)) + geom_bar(stat = "identity") + geom_text(
   aes(x = Director, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (money&reputation) by Director post 2000")
+  vjust = -0.5, size = 2)+ coord_flip() +
+  xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000 & rate>8 by Director")
 
 #successful Studio money &reputation post-2000
 movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
@@ -124,7 +133,8 @@ stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
 ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gross, fill = Studio)) + geom_bar(stat = "identity") + geom_text(
   aes(x = Studio, y = Adjusted_Gross, label = Adjusted_Gross),
   position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (money&reputation) by Studio post 2000")
+  vjust = -0.5, size = 2)+ coord_flip() +
+  xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000 & rate>8) by Studio")
 
 
 #Adjusted_Gross_Revenue, 2000

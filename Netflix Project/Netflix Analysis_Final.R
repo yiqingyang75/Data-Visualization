@@ -43,27 +43,35 @@ movie = modify_outlier(movie,"Adjusted_Gross")
 movie = modify_outlier(movie,"Profit")
 movie = modify_outlier(movie,"Profit_perc")
 
+#adjust revenue and roi into normal distributin for further ANOVA testing
+movie$adj_rev = movie$Adjusted_Gross ^ (1/10)
+ggplot(movie,aes(x=adj_rev))+geom_histogram(binwidth = 0.005) + 
+  xlab("Ajusted Gross Revenue") + ggtitle("Distribution of Ajusted_Gross")
+movie$adj_roi = movie$Profit_perc ^ (1/6)
+ggplot(movie,aes(x=adj_roi))+geom_histogram(binwidth = 0.02) + 
+  xlab("Ajusted Gross Revenue") + ggtitle("Distribution of Ajusted_Gross")
 
 #inflation? preference? limit our time range to >2000
+movie_2000 = movie[movie$Release_Date >= "2000-1-1",]
+#inflation
 ggplot(movie,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
   ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
 
+
+ggplot(movie_2000,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
+  ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
+
+#preference
 ggplot(movieC,aes(Release_Year, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
   scale_fill_gradient(low = "white", high = "blue") + 
   geom_vline(aes(xintercept=2000), colour='red', linetype='dashed', lwd=1) + 
   xlab("Year") + ggtitle("Preference of genre over year")
 
-
-movie_2000 = movie[movie$Release_Date >= "2000-1-1",]
-
-ggplot(movie_2000,aes(x=Release_Date,y=Adjusted_Gross)) +geom_point() +
-  ylab("Ajuested Gross Revenue") + ggtitle ("Ajusted Gross Revenue by time") + theme_economist()
-
 ggplot(movie_2000,aes(Release_Year, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
   scale_fill_gradient(low = "white", high = "blue") + 
   geom_vline(aes(xintercept=2000), colour='red', linetype='dashed', lwd=1) + 
   xlab("Year") + ggtitle("Preference of genre over year")
-summary(movie_2000)
+
 
 #Release time vs revenue
 ggplot(movie_2000,aes(Day_of_Week, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
@@ -99,6 +107,29 @@ cor(movie_2000$Profit_perc,movie_2000[,c("MovieLens_Rating","IMDb_Rating")])
 ggplot(data = movie_2000, aes(x = Budget, y = Adjusted_Gross)) + geom_point() + 
   geom_smooth(se=TRUE) + ylab("Revenue") +  ggtitle("Budget vs Revenue") + theme_economist()
 
+#relationship between genre and revenue/profit
+movie_2000 %>%
+  group_by(Genre) %>%
+  summarise(Avg_Revenue = mean(Adjusted_Gross)) %>%
+  arrange(desc(Avg_Revenue)) %>%
+  ggplot(aes(x = reorder(Genre,Avg_Revenue), y = Avg_Revenue)) + 
+  geom_bar(stat = "identity",fill = "#56B4E9") + 
+  ylab("Average Revenue") + xlab("Genre") + ggtitle("Genre vs Revenue")+ 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1)) 
+
+movie_2000 %>%
+  group_by(Genre) %>%
+  summarise(Avg_profit = mean(Profit)) %>%
+  arrange(desc(Avg_profit)) %>%
+  ggplot(aes(x = reorder(Genre,Avg_profit), y = Avg_profit)) + 
+  geom_bar(stat = "identity",fill = "#56B4E9") + 
+  ylab("Average Profit") + xlab("Genre") + ggtitle("Genre vs Profit")+ 
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1))
+
+#running time vs revenue?
+ggplot(movie_2000,aes(Runtime_min, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") + 
+  xlab("Running Time") + ggtitle("Running time vs Revenue by Genre")
 
 #If a movie does well in US, does it also usually do well overseas? 
 ggplot(movie_2000, aes(x = US_rev, y = Overseas_rev)) +   
@@ -157,7 +188,7 @@ ggplot(movie2000_target30[movie2000_target30$Genre %in% c("adventure", "sci-fi")
   geom_col(position = "dodge") + coord_flip() +
   xlab("Director") + ylab("Revenue") + ggtitle("Select Director with high Revenue")
 
-C#if based on ROI
+#if based on ROI
 ggplot(movie2000_target30[movie2000_target30$Genre %in% c("drama"),], 
        aes(x = fct_reorder(Director,avg_ROI), y = avg_ROI, fill = Genre)) +
   geom_col(position = "dodge") + coord_flip() +
@@ -214,32 +245,112 @@ ggplot(movie2000_drama,
   xlab("Release Month") + ylab("ROI") + ggtitle ("ROI by Month")
 
 #ANOVA test acroos month is not significant
-adventure.aov = aov(Adjusted_Gross ~ Release_Month, data = movie2000_adventure)
+adventure.aov = aov(adj_rev ~ Release_Month, data = movie2000_adventure)
 summary(adventure.aov)
 
-sci.aov = aov(Adjusted_Gross ~ Release_Month, data = movie2000_sci)
+sci.aov = aov(adj_rev ~ Release_Month, data = movie2000_sci)
 summary(sci.aov)
 TukeyHSD(sci.aov)
 
-drama.aov = aov(Profit_perc ~ Release_Month, data = movie2000_drama)
+drama.aov = aov(adj_roi ~ Release_Month, data = movie2000_drama)
 summary(drama.aov)
 
-genre_aov = aov(Adjusted_Gross ~Genre, movie_2000)
-summary(genre_aov)
 
 #ANOVA test for overall Revenue acroos month
-month_aov = aov(Adjusted_Gross ~ Release_Month, movie_2000)
+ggplot(movie_2000, aes(y = Adjusted_Gross, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
+  xlab("Release Month") + ylab("Revenue") + ggtitle ("Overall Revenue by Month")
+
+month_aov = aov(adj_rev ~ Release_Month, movie_2000)
 summary(month_aov)
 month_aov = as.data.frame(TukeyHSD(month_aov)[1])
 month_aov[month_aov$Release_Month.p.adj<0.05,]
 
-ggplot(movie_2000, aes(y = Adjusted_Gross, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
-  xlab("Release Month") + ylab("Revenue") + ggtitle ("Overall Revenue by Month")
-
 #ANOVA test for overall ROI acroos month
-ggplot(movie_2000, aes(y = Profit_perc, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
+ggplot(movie_2000, aes(y = adj_roi, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
   xlab("Release Month") + ylab("ROI") + ggtitle ("Overall ROI by Month")
 month_roi_aov =  aov(Profit_perc ~ Release_Month, movie_2000)
 summary(month_roi_aov)
 month_roi_aov = as.data.frame(TukeyHSD(month_roi_aov)[1])
 month_roi_aov[month_roi_aov$Release_Month.p.adj<0.05,]
+
+
+#scenario analysis
+#Success is Money!
+#revenue>1000, revenue, post-2000
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+stat_mean <- aggregate(Adjusted_Gross~Genre, movie_successful_revenue, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2)+ xlab("Genre")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000) by Genre")
+
+#successful director!! money post-2000
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+stat_mean <- aggregate(Adjusted_Gross~Director, movie_successful_revenue, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Director,Adjusted_Gross), y = Adjusted_Gross, fill = Director)) + 
+  geom_bar(stat = "identity") + geom_text(
+    aes(x = Director, y = Adjusted_Gross, label = Adjusted_Gross),
+    position = position_dodge(width = 1),
+    vjust = -0.5, size = 2) + coord_flip() +
+  xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000) by Director")
+
+#successful Studio money &reputation post-2000
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+stat_mean <- aggregate(Adjusted_Gross~Studio, movie_successful_revenue, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gross, fill = Studio)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Studio, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2) + coord_flip() + 
+  xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue > 1000) by Studio")
+
+#Success is Money + Reputation
+#rev>1000 &rating >=8
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+movie_successful_revandrat = movie_successful_revenue[movie_successful_revenue$IMDb_Rating>=8.0,]
+stat_mean <- aggregate(Adjusted_Gross~Genre, movie_successful_revandrat, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2)+ 
+  xlab("Genre")+ylab("Adjusted Gross Revenue")+
+  ggtitle("Successful (revenue>1000 & rate > 8) by Genre")
+
+#successful director!! money&reputation post-2000
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+movie_successful_revandrat = movie_successful_revenue[movie_successful_revenue$IMDb_Rating>=8.0,]
+stat_mean <- aggregate(Adjusted_Gross~Director, movie_successful_revandrat, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Director,Adjusted_Gross), y = Adjusted_Gross, fill = Director)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Director, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2)+ coord_flip() +
+  xlab("Director")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000 & rate>8 by Director")
+
+#successful Studio money &reputation post-2000
+movie_successful_revenue = movie_2000[movie_2000$Adjusted_Gross>= 1000,]
+movie_successful_revandrat = movie_successful_revenue[movie_successful_revenue$IMDb_Rating>=8.0,]
+stat_mean <- aggregate(Adjusted_Gross~Studio, movie_successful_revandrat, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gross, fill = Studio)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Studio, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2)+ coord_flip() +
+  xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000 & rate>8) by Studio")
+
+
+#Adjusted_Gross_Revenue, 2000
+stat_mean <- aggregate(Adjusted_Gross~Genre, movie_2000, mean)
+stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
+ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
+  aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
+  position = position_dodge(width = 1),
+  vjust = -0.5, size = 2)+ xlab("Genre")+ylab("Adjusted_Gross")+ggtitle("Adjusted_Gross by Genre")
+
+
+
+
+

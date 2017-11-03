@@ -340,17 +340,3 @@ ggplot(data = stat_mean, aes(x=reorder(Studio,Adjusted_Gross), y = Adjusted_Gros
   position = position_dodge(width = 1),
   vjust = -0.5, size = 2)+ coord_flip() +
   xlab("Studio")+ylab("Adjusted Gross Revenue")+ggtitle("Successful (revenue>1000 & rate>8) by Studio")
-
-
-#Adjusted_Gross_Revenue, 2000
-stat_mean <- aggregate(Adjusted_Gross~Genre, movie_2000, mean)
-stat_mean$Adjusted_Gross <- round(stat_mean$Adjusted_Gross, 2)
-ggplot(data = stat_mean, aes(x=reorder(Genre,Adjusted_Gross), y = Adjusted_Gross, fill = Genre)) + geom_bar(stat = "identity") + geom_text(
-  aes(x = Genre, y = Adjusted_Gross, label = Adjusted_Gross),
-  position = position_dodge(width = 1),
-  vjust = -0.5, size = 2)+ xlab("Genre")+ylab("Adjusted_Gross")+ggtitle("Adjusted_Gross by Genre")
-
-
-
-
-

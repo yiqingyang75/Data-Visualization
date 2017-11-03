@@ -199,10 +199,47 @@ ggplot(movie2000_target, aes(x = Runtime_min, y = Profit_perc)) +
 
 
 ####Release Month?####
-ggplot(movie2000_target,aes(Release_Month, Genre,fill = Adjusted_Gross)) + geom_tile(color = "white") +
-  scale_fill_gradient(low = "white", high = "blue") + xlab("Month") + ggtitle("Which month to release (Revenue)")
+movie2000_target$Release_Month = as.factor(movie2000_target$Release_Month)
+movie2000_adventure$Release_Month = as.factor(movie2000_adventure$Release_Month)
+movie2000_sci$Release_Month = as.factor(movie2000_sci$Release_Month)
+movie2000_drama$Release_Month = as.factor(movie2000_drama$Release_Month)
+movie_2000$Release_Month = as.factor(movie_2000$Release_Month)
 
-ggplot(movie2000_target,aes(Release_Month, Genre,fill = Profit_perc)) + geom_tile(color = "white") +
-  scale_fill_gradient(low = "white", high = "blue") + xlab("Month") + ggtitle("Which month to release (ROI)")
+ggplot(movie2000_target[movie2000_target$Genre %in% c("adventure","sci-fi"),],
+       aes(y = Adjusted_Gross, x = Release_Month, fill = Genre)) + geom_boxplot() +
+  xlab("Release Month") + ylab("Revenue") + ggtitle ("Revenue by Month")
 
+ggplot(movie2000_drama,
+       aes(y = Profit_perc, x = Release_Month, fill = Genre)) + geom_boxplot() + 
+  xlab("Release Month") + ylab("ROI") + ggtitle ("ROI by Month")
 
+#ANOVA test acroos month is not significant
+adventure.aov = aov(Adjusted_Gross ~ Release_Month, data = movie2000_adventure)
+summary(adventure.aov)
+
+sci.aov = aov(Adjusted_Gross ~ Release_Month, data = movie2000_sci)
+summary(sci.aov)
+TukeyHSD(sci.aov)
+
+drama.aov = aov(Profit_perc ~ Release_Month, data = movie2000_drama)
+summary(drama.aov)
+
+genre_aov = aov(Adjusted_Gross ~Genre, movie_2000)
+summary(genre_aov)
+
+#ANOVA test for overall Revenue acroos month
+month_aov = aov(Adjusted_Gross ~ Release_Month, movie_2000)
+summary(month_aov)
+month_aov = as.data.frame(TukeyHSD(month_aov)[1])
+month_aov[month_aov$Release_Month.p.adj<0.05,]
+
+ggplot(movie_2000, aes(y = Adjusted_Gross, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
+  xlab("Release Month") + ylab("Revenue") + ggtitle ("Overall Revenue by Month")
+
+#ANOVA test for overall ROI acroos month
+ggplot(movie_2000, aes(y = Profit_perc, x = Release_Month)) + geom_boxplot(fill = "#56B4E9") + 
+  xlab("Release Month") + ylab("ROI") + ggtitle ("Overall ROI by Month")
+month_roi_aov =  aov(Profit_perc ~ Release_Month, movie_2000)
+summary(month_roi_aov)
+month_roi_aov = as.data.frame(TukeyHSD(month_roi_aov)[1])
+month_roi_aov[month_roi_aov$Release_Month.p.adj<0.05,]
